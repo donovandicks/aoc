@@ -1,6 +1,6 @@
 from io import TextIOWrapper
 from functools import reduce
-from typing import Callable, TypeVar
+from typing import Callable
 import re
 
 DIGIT = re.compile(r"\d")
@@ -21,7 +21,7 @@ def process_d1_p1(data: TextIOWrapper) -> int:
 
 
 def process_d1_p2(data: TextIOWrapper) -> int:
-    clean = (
+    clean_lines = (
         data.read()
         .replace("one", "o1e")
         .replace("two", "t2o")
@@ -33,16 +33,12 @@ def process_d1_p2(data: TextIOWrapper) -> int:
         .replace("eight", "e8t")
         .replace("nine", "n9e")
         .strip()
+        .split("\n")
     )
 
-    tot = sum(
-        [
-            int("".join(first_and_last(DIGIT.findall(line))))
-            for line in clean.split("\n")
-        ]
+    return sum(
+        [int("".join(first_and_last(DIGIT.findall(line)))) for line in clean_lines]
     )
-
-    return tot
 
 
 def process_d2_p1(data: TextIOWrapper) -> int:
@@ -52,22 +48,20 @@ def process_d2_p1(data: TextIOWrapper) -> int:
         "blue": 14,
     }
 
+    def is_possible(words: list[str]) -> bool:
+        for i in range(0, len(words), 2):
+            if int(words[i]) > CUBES[words[i + 1]]:
+                return False
+
+        return True
+
     tot = 0
     for line in data.readlines():
         game_num, sets = line.split(":")
         gid = int(game_num.split(" ")[1])
-        possible = True
 
-        for s in sets.strip().replace(",", "").split(";"):
-            words = s.split(" ")
-            for i in range(len(words)):
-                if not words[i].isnumeric():
-                    continue
-
-                if int(words[i]) > CUBES[words[i + 1]]:
-                    possible = False
-
-        if possible:
+        words = sets.strip().replace(",", "").replace(";", "").split(" ")
+        if is_possible(words):
             tot += gid
 
     return tot
@@ -83,9 +77,8 @@ def process_d2_p2(data: TextIOWrapper) -> int:
             "blue": 0,
         }
 
-        for i in range(len(words)):
-            if words[i].isnumeric() and int(words[i]) > maxes[words[i + 1]]:
-                maxes[words[i + 1]] = int(words[i])
+        for i in range(0, len(words), 2):
+            maxes[words[i + 1]] = max(int(words[i]), maxes[words[i + 1]])
 
         powers.append(reduce(lambda x, y: x * y, maxes.values(), 1))
 
