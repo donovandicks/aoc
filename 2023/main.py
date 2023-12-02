@@ -50,12 +50,45 @@ def process_d1_p2(data: TextIOWrapper):
     print(f"Answer: {tot}")
 
 
+def process_d2_p1(data: TextIOWrapper):
+    CUBES = {
+        "red": 12,
+        "green": 13,
+        "blue": 14,
+    }
+
+    tot = 0
+    for line in data.readlines():
+        game_num, sets = line.split(":")
+        gid = int(game_num.split(" ")[1])
+        possible = True
+
+        for s in sets.strip().replace(",", "").split(";"):
+            words = s.split(" ")
+            for i in range(len(words)):
+                if words[i] == ",":
+                    continue
+
+                if not words[i].isnumeric():
+                    continue
+
+                if int(words[i]) > CUBES[words[i + 1]]:
+                    possible = False
+
+        if possible:
+            tot += gid
+
+    print(f"Answer: {tot}")
+
+
 def get_processor(day: int, part: int) -> Callable:
     match day, part:
         case 1, 1:
             return process_d1_p1
         case 1, 2:
             return process_d1_p2
+        case 2, 1:
+            return process_d2_p1
         case _:
             raise
 
