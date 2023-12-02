@@ -1,26 +1,4 @@
-const load = (day: number) => Deno.readTextFileSync(`./inputs/day_${day}.txt`);
-
-type ProcessorFunc = (data: string) => number;
-
-const DIGIT = RegExp("\\d", "g");
-
-function firstAndLast<T>(xs: T[]): [T, T] {
-  return [xs.at(0) as T, xs.at(-1) as T];
-}
-
-const processD1P1 = (data: string): number => {
-  return data.trim().split("\n").map((line) =>
-    Number(firstAndLast([...line.matchAll(DIGIT)]).join(""))
-  ).reduce((n, a) => n + a, 0);
-};
-
-const getProcessor = (day: number, part: number): ProcessorFunc => {
-  if (day === 1 && part === 1) {
-    return processD1P1;
-  }
-
-  throw Error(`Unsupported day=${day} or part=${part}`);
-};
+import { getProcessor, load } from "./lib.ts";
 
 const main = (day: number, part: number) => {
   const data = load(day);
