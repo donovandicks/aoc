@@ -55,22 +55,19 @@ def process_d2_p1(data: TextIOWrapper) -> int:
 
         return True
 
-    tot = 0
-    for line in data.readlines():
-        game_num, sets = line.split(":")
-        gid = int(game_num.split(" ")[1])
-
-        words = sets.strip().replace(",", "").replace(";", "").split(" ")
-        if is_possible(words):
-            tot += gid
-
-    return tot
+    return sum(
+        [
+            int(line.split(":")[0].split(" ")[1])
+            for line in data.readlines()
+            if is_possible(
+                line.split(":")[1].strip().replace(",", "").replace(";", "").split(" ")
+            )
+        ]
+    )
 
 
 def process_d2_p2(data: TextIOWrapper) -> int:
-    powers = []
-    for line in data.readlines():
-        words = line.split(":")[1].strip().replace(",", "").replace(";", "").split(" ")
+    def make_power(words: list[str]) -> int:
         maxes = {
             "red": 0,
             "green": 0,
@@ -80,9 +77,16 @@ def process_d2_p2(data: TextIOWrapper) -> int:
         for i in range(0, len(words), 2):
             maxes[words[i + 1]] = max(int(words[i]), maxes[words[i + 1]])
 
-        powers.append(reduce(lambda x, y: x * y, maxes.values(), 1))
+        return reduce(lambda x, y: x * y, maxes.values(), 1)
 
-    return sum(powers)
+    return sum(
+        [
+            make_power(
+                line.split(":")[1].strip().replace(",", "").replace(";", "").split(" ")
+            )
+            for line in data.readlines()
+        ]
+    )
 
 
 def get_processor(day: int, part: int) -> Callable[[TextIOWrapper], int]:
