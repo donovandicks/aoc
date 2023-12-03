@@ -150,30 +150,13 @@ def process_d3_p2(data: TextIOWrapper) -> int:
     def get_num_from_pos(r: int, c: int) -> tuple[int, int, int]:
         i, j = c - 1, c + 1
         num = matrix[r][c]
-        stop_i, stop_j = False, False
-        while True:
-            if not stop_i:
-                try:
-                    if (n := matrix[r][i]).isnumeric():
-                        num = n + num
-                        i -= 1
-                    else:
-                        stop_i = True
-                except IndexError:
-                    stop_i = True
+        while i >= 0 and (n := matrix[r][i]).isnumeric():
+            num = n + num
+            i -= 1
 
-            if not stop_j:
-                try:
-                    if (n := matrix[r][j]).isnumeric():
-                        num += n
-                        j += 1
-                    else:
-                        stop_j = True
-                except IndexError:
-                    stop_j = True
-
-            if stop_i and stop_j:
-                break
+        while j < len(matrix[r]) and (n := matrix[r][j]).isnumeric():
+            num += n
+            j += 1
 
         return int(num), i, j
 
