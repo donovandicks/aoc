@@ -120,6 +120,10 @@ def process_d3_p1(data: TextIOWrapper) -> int:
         num = ""
         adj_to_sym = False
         while c < len(matrix[r]):
+            if not matrix[r][c].isnumeric():
+                c += 1
+                continue
+
             while (char := matrix[r][c]).isnumeric():
                 num += char
                 if check_adj(r, c):
@@ -143,9 +147,9 @@ def process_d3_p1(data: TextIOWrapper) -> int:
 def process_d3_p2(data: TextIOWrapper) -> int:
     matrix = [line.strip() for line in data.readlines()]
 
-    def get_num_from_pos(pos: tuple[int, int]) -> tuple[int, tuple[int, int, int]]:
-        r, i, j = pos[0], pos[1] - 1, pos[1] + 1
-        num = matrix[r][pos[1]]
+    def get_num_from_pos(r: int, c: int) -> tuple[int, int, int]:
+        i, j = c - 1, c + 1
+        num = matrix[r][c]
         stop_i, stop_j = False, False
         while True:
             if not stop_i:
@@ -171,9 +175,9 @@ def process_d3_p2(data: TextIOWrapper) -> int:
             if stop_i and stop_j:
                 break
 
-        return int(num), (r, i, j)
+        return int(num), i, j
 
-    def check_adj(r: int, c: int) -> tuple[list[int], set[tuple[int, int]]]:
+    def get_ratio(r: int, c: int) -> int:
         cycle = [
             [0, -1],  # l
             [-1, -1],  # tl
@@ -186,33 +190,35 @@ def process_d3_p2(data: TextIOWrapper) -> int:
         ]
 
         nums = []
-        num_positions = set()
+        ps = {}
+
         for offset in cycle:
             try:
-                new = (r + offset[0], c + offset[1])
-                sym = matrix[r + offset[0]][c + offset[1]]
-                if sym.isnumeric():
-                    num, (row, start, stop) = get_num_from_pos(new)
-                    if (row, start, stop) in num_positions:
-                        continue
+                new_r, new_c = r + offset[0], c + offset[1]
+                if any(new_c in range(start, stop + 1) for start, stop in ps.get(new_r, set())):
+                       continue
 
-                    num_positions.add((row, start, stop))
+                sym = matrix[new_r][new_c]
+                if sym.isnumeric():
+                    num, start, stop = get_num_from_pos(new_r, new_c)
+                    if len(nums) == 2:
+                        return 0 # exit early if we find more than 2
+
+                    ps.setdefault(new_r, set()).add((start, stop))
                     nums.append(num)
             except IndexError:
                 continue
 
-        if len(num_positions) == 2:
-            return nums, num_positions
+        if len(nums) == 2:
+            return nums[0] * nums[1]
 
-        return [], set()
+        return 0
 
     tot = 0
     for r in range(len(matrix)):
         for c in range(len(matrix)):
             if matrix[r][c] == "*":
-                nums, _ = check_adj(r, c)
-                if nums:
-                    tot += nums[0] * nums[1]
+                tot += get_ratio(r, c)
 
     return tot
 
