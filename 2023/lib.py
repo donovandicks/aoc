@@ -195,20 +195,20 @@ def process_d3_p2(data: TextIOWrapper) -> int:
         for offset in cycle:
             try:
                 new_r, new_c = r + offset[0], c + offset[1]
+                sym = matrix[new_r][new_c]
+
+                if not sym.isnumeric():
+                    continue
+
                 if any(
                     new_c in range(start, stop + 1)
                     for start, stop in ps.get(new_r, set())
                 ):
                     continue
 
-                sym = matrix[new_r][new_c]
-                if sym.isnumeric():
-                    num, start, stop = get_num_from_pos(new_r, new_c)
-                    if len(nums) == 2:
-                        return 0  # exit early if we find more than 2
-
-                    ps.setdefault(new_r, set()).add((start, stop))
-                    nums.append(num)
+                num, start, stop = get_num_from_pos(new_r, new_c)
+                ps.setdefault(new_r, set()).add((start, stop))
+                nums.append(num)
             except IndexError:
                 continue
 
