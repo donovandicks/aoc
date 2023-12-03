@@ -105,31 +105,33 @@ def process_d3_p1(data: TextIOWrapper) -> int:
         ]
 
         for offset in cycle:
-            try:
-                sym = matrix[r + offset[0]][c + offset[1]]
-                if not sym.isnumeric() and sym != ".":
-                    return True
-            except IndexError:
-                continue
+            new_r, new_c = r + offset[0], c + offset[1]
+            if (
+                new_r < len(matrix)
+                and new_c < len(matrix[new_r])
+                and not matrix[new_r][new_c].isnumeric()
+                and matrix[new_r][new_c] != "."
+            ):
+                return True
 
         return False
 
     tot = 0
-    for r in range(len(matrix)):
+    for r, row in enumerate(matrix):
         c = 0
         num = ""
         adj_to_sym = False
-        while c < len(matrix[r]):
-            if not matrix[r][c].isnumeric():
+        while c < len(row):
+            if not row[c].isnumeric():
                 c += 1
                 continue
 
-            while (char := matrix[r][c]).isnumeric():
+            while (char := row[c]).isnumeric():
                 num += char
                 if check_adj(r, c):
                     adj_to_sym = True
 
-                if (next := c + 1) < len(matrix[r]):
+                if (next := c + 1) < len(row):
                     c = next
                 else:
                     break
@@ -147,14 +149,14 @@ def process_d3_p1(data: TextIOWrapper) -> int:
 def process_d3_p2(data: TextIOWrapper) -> int:
     matrix = [line.strip() for line in data.readlines()]
 
-    def get_num_from_pos(r: int, c: int) -> tuple[int, int, int]:
+    def get_num_from_pos(row: str, c: int) -> tuple[int, int, int]:
         i, j = c - 1, c + 1
-        num = matrix[r][c]
-        while i >= 0 and (n := matrix[r][i]).isnumeric():
+        num = row[c]
+        while i >= 0 and (n := row[i]).isnumeric():
             num = n + num
             i -= 1
 
-        while j < len(matrix[r]) and (n := matrix[r][j]).isnumeric():
+        while j < len(row) and (n := row[j]).isnumeric():
             num += n
             j += 1
 
@@ -176,29 +178,26 @@ def process_d3_p2(data: TextIOWrapper) -> int:
         ps = {}
 
         for offset in cycle:
-            try:
-                new_r, new_c = r + offset[0], c + offset[1]
-                sym = matrix[new_r][new_c]
-
-                if not sym.isnumeric():
-                    continue
-
-                if any(
+            new_r, new_c = r + offset[0], c + offset[1]
+            if (
+                new_r > len(matrix)
+                or new_c > len(matrix[new_r])
+                or not matrix[new_r][new_c].isnumeric()
+                or any(
                     new_c in range(start, stop + 1)
                     for start, stop in ps.get(new_r, set())
-                ):
-                    continue
-
-                num, start, stop = get_num_from_pos(new_r, new_c)
-                ps.setdefault(new_r, set()).add((start, stop))
-                nums.append(num)
-            except IndexError:
+                )
+            ):
                 continue
 
-        if len(nums) == 2:
-            return nums[0] * nums[1]
+            num, start, stop = get_num_from_pos(matrix[new_r], new_c)
+            ps.setdefault(new_r, set()).add((start, stop))
+            nums.append(num)
 
-        return 0
+        if len(nums) != 2:
+            return 0
+
+        return nums[0] * nums[1]
 
     return sum(
         get_ratio(r, c)
