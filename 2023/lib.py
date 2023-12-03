@@ -195,14 +195,17 @@ def process_d3_p2(data: TextIOWrapper) -> int:
         for offset in cycle:
             try:
                 new_r, new_c = r + offset[0], c + offset[1]
-                if any(new_c in range(start, stop + 1) for start, stop in ps.get(new_r, set())):
-                       continue
+                if any(
+                    new_c in range(start, stop + 1)
+                    for start, stop in ps.get(new_r, set())
+                ):
+                    continue
 
                 sym = matrix[new_r][new_c]
                 if sym.isnumeric():
                     num, start, stop = get_num_from_pos(new_r, new_c)
                     if len(nums) == 2:
-                        return 0 # exit early if we find more than 2
+                        return 0  # exit early if we find more than 2
 
                     ps.setdefault(new_r, set()).add((start, stop))
                     nums.append(num)
@@ -214,13 +217,12 @@ def process_d3_p2(data: TextIOWrapper) -> int:
 
         return 0
 
-    tot = 0
-    for r in range(len(matrix)):
-        for c in range(len(matrix)):
-            if matrix[r][c] == "*":
-                tot += get_ratio(r, c)
-
-    return tot
+    return sum(
+        get_ratio(r, c)
+        for r in range(len(matrix))
+        for c in range(len(matrix[r]))
+        if matrix[r][c] == "*"
+    )
 
 
 def get_processor(day: int, part: int) -> Callable[[TextIOWrapper], int]:
