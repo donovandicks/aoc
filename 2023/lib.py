@@ -1,9 +1,18 @@
 import re
-from functools import reduce
 from io import TextIOWrapper
 from typing import Callable
 
 DIGIT = re.compile(r"\d")
+ADJS = [
+    [-1, -1],  # tl
+    [-1, 0],  # tm
+    [-1, 1],  # tr
+    [0, 1],  # r
+    [1, 1],  # br
+    [1, 0],  # bm
+    [1, -1],  # bl
+    [0, -1],  # l
+]
 
 
 def load(day: int) -> TextIOWrapper:
@@ -49,11 +58,9 @@ def process_d2_p1(data: TextIOWrapper) -> int:
     }
 
     def is_possible(words: list[str]) -> bool:
-        for i in range(0, len(words), 2):
-            if int(words[i]) > CUBES[words[i + 1]]:
-                return False
-
-        return True
+        return all(
+            int(words[i]) <= CUBES[words[i + 1]] for i in range(0, len(words), 2)
+        )
 
     return sum(
         [
@@ -77,7 +84,7 @@ def process_d2_p2(data: TextIOWrapper) -> int:
         for i in range(0, len(words), 2):
             maxes[words[i + 1]] = max(int(words[i]), maxes[words[i + 1]])
 
-        return reduce(lambda x, y: x * y, maxes.values(), 1)
+        return maxes["blue"] * maxes["green"] * maxes["red"]
 
     return sum(
         [
@@ -93,28 +100,13 @@ def process_d3_p1(data: TextIOWrapper) -> int:
     matrix = [line.strip() for line in data.readlines()]
 
     def check_adj(r: int, c: int) -> bool:
-        cycle = [
-            [-1, -1],  # tl
-            [-1, 0],  # tm
-            [-1, 1],  # tr
-            [0, 1],  # r
-            [1, 1],  # br
-            [1, 0],  # bm
-            [1, -1],  # bl
-            [0, -1],  # l
-        ]
-
-        for offset in cycle:
-            new_r, new_c = r + offset[0], c + offset[1]
-            if (
-                new_r < len(matrix)
-                and new_c < len(matrix[new_r])
-                and not matrix[new_r][new_c].isnumeric()
-                and matrix[new_r][new_c] != "."
-            ):
-                return True
-
-        return False
+        return any(
+            r + r_off < len(matrix)
+            and c + c_off < len(matrix[r + r_off])
+            and not matrix[r + r_off][c + c_off].isnumeric()
+            and matrix[r + r_off][c + c_off] != "."
+            for (r_off, c_off) in ADJS
+        )
 
     tot = 0
     for r, row in enumerate(matrix):
@@ -163,21 +155,10 @@ def process_d3_p2(data: TextIOWrapper) -> int:
         return int(num), i, j
 
     def get_ratio(r: int, c: int) -> int:
-        cycle = [
-            [0, -1],  # l
-            [-1, -1],  # tl
-            [-1, 0],  # tm
-            [-1, 1],  # tr
-            [1, -1],  # bl
-            [1, 0],  # bm
-            [1, 1],  # br
-            [0, 1],  # r
-        ]
-
         nums = []
         ps = {}
 
-        for offset in cycle:
+        for offset in ADJS:
             new_r, new_c = r + offset[0], c + offset[1]
             if (
                 new_r > len(matrix)
