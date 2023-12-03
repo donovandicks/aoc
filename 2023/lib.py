@@ -106,20 +106,15 @@ def process_d3_p1(data: TextIOWrapper) -> int:
 
         for offset in cycle:
             try:
-                curr = matrix[r][c]
-                new_pos = (r + offset[0], c + offset[1])
                 sym = matrix[r + offset[0]][c + offset[1]]
                 if not sym.isnumeric() and sym != ".":
-                    print(
-                        f"Character {curr} at position {r, c} is adjacent to symbol {sym} at position {new_pos}"
-                    )
                     return True
             except IndexError:
                 continue
 
         return False
 
-    numbers = []
+    tot = 0
     for r in range(len(matrix)):
         c = 0
         num = ""
@@ -136,14 +131,13 @@ def process_d3_p1(data: TextIOWrapper) -> int:
                     break
 
             if adj_to_sym:
-                numbers.append(num)
+                tot += int(num)
 
             adj_to_sym = False
             num = ""
             c += 1
 
-    print(numbers)
-    return sum(int(n) for n in numbers)
+    return tot
 
 
 def get_processor(day: int, part: int) -> Callable[[TextIOWrapper], int]:
