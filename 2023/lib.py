@@ -140,6 +140,83 @@ def process_d3_p1(data: TextIOWrapper) -> int:
     return tot
 
 
+def process_d3_p2(data: TextIOWrapper) -> int:
+    matrix = [line.strip() for line in data.readlines()]
+
+    def get_num_from_pos(pos: tuple[int, int]) -> tuple[int, tuple[int, int, int]]:
+        r, i, j = pos[0], pos[1] - 1, pos[1] + 1
+        num = matrix[r][pos[1]]
+        stop_i, stop_j = False, False
+        while True:
+            if not stop_i:
+                try:
+                    if (n := matrix[r][i]).isnumeric():
+                        num = n + num
+                        i -= 1
+                    else:
+                        stop_i = True
+                except IndexError:
+                    stop_i = True
+
+            if not stop_j:
+                try:
+                    if (n := matrix[r][j]).isnumeric():
+                        num += n
+                        j += 1
+                    else:
+                        stop_j = True
+                except IndexError:
+                    stop_j = True
+
+            if stop_i and stop_j:
+                break
+
+        return int(num), (r, i, j)
+
+    def check_adj(r: int, c: int) -> tuple[list[int], set[tuple[int, int]]]:
+        cycle = [
+            [0, -1],  # l
+            [-1, -1],  # tl
+            [-1, 0],  # tm
+            [-1, 1],  # tr
+            [1, -1],  # bl
+            [1, 0],  # bm
+            [1, 1],  # br
+            [0, 1],  # r
+        ]
+
+        nums = []
+        num_positions = set()
+        for offset in cycle:
+            try:
+                new = (r + offset[0], c + offset[1])
+                sym = matrix[r + offset[0]][c + offset[1]]
+                if sym.isnumeric():
+                    num, (row, start, stop) = get_num_from_pos(new)
+                    if (row, start, stop) in num_positions:
+                        continue
+
+                    num_positions.add((row, start, stop))
+                    nums.append(num)
+            except IndexError:
+                continue
+
+        if len(num_positions) == 2:
+            return nums, num_positions
+
+        return [], set()
+
+    tot = 0
+    for r in range(len(matrix)):
+        for c in range(len(matrix)):
+            if matrix[r][c] == "*":
+                nums, _ = check_adj(r, c)
+                if nums:
+                    tot += nums[0] * nums[1]
+
+    return tot
+
+
 def get_processor(day: int, part: int) -> Callable[[TextIOWrapper], int]:
     match day, part:
         case 1, 1:
@@ -152,5 +229,7 @@ def get_processor(day: int, part: int) -> Callable[[TextIOWrapper], int]:
             return process_d2_p2
         case 3, 1:
             return process_d3_p1
+        case 3, 2:
+            return process_d3_p2
         case _:
-            raise
+            raise Exception(f"Unknown day:part pair {day=} {part=}")
