@@ -14,10 +14,14 @@ function firstAndLast<T>(xs: T[]): [T, T] {
   return [xs.at(0) as T, xs.at(-1) as T];
 }
 
+Array.prototype.sum = function (): number {
+  return this.reduce((n, a) => n + a, 0);
+};
+
 const processD1P1 = (data: string): number =>
   data.trim().split("\n").map((line) =>
     Number(firstAndLast([...line.matchAll(DIGIT)]).join(""))
-  ).reduce((n, a) => n + a, 0);
+  ).sum();
 
 const processD1P2 = (data: string): number =>
   data
@@ -32,23 +36,25 @@ const processD1P2 = (data: string): number =>
     .replaceAll("nine", "n9e")
     .trim().split("\n").map((line) =>
       Number(firstAndLast([...line.matchAll(DIGIT)]).join(""))
-    ).reduce((n, a) => n + a, 0);
+    ).sum();
 
 const processD2P1 = (data: string): number =>
   data.trim().split("\n").map((line) => {
     const [game, sets] = line.split(":");
     if (
-      sets.replaceAll(",", "").replaceAll(";", "").split(" ").map((v, i, a) => {
-        if (i % 2 === 0) {
-          return;
-        }
+      sets.replaceAll(",", "").replaceAll(";", "").trim().split(" ").map(
+        (v, i, a) => {
+          if (i % 2 !== 0) {
+            return;
+          }
 
-        return Number(v) <= CUBES[a[i + 1]];
-      }).filter((v): v is boolean => v !== undefined).every((v) => v === true)
+          return Number(v) <= CUBES[a[i + 1]];
+        },
+      ).filter((v): v is boolean => v !== undefined).every((v) => v)
     ) {
       return Number(game.split(" ")[1]);
     }
-  }).filter((v): v is number => !!v).reduce((n, a) => n + a, 0);
+  }).filter((v): v is number => !!v).sum();
 
 export const getProcessor = (day: number, part: number): ProcessorFunc => {
   if (day === 1 && part === 1) {
