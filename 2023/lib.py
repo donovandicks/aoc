@@ -190,14 +190,25 @@ def process_d3_p2(data: TextIOWrapper) -> int:
 
 
 def process_d4_p1(data: TextIOWrapper) -> int:
-    tot = 0
-    for line in data.readlines():
-        want, have = line.split(":")[1].strip().split("|")
-        matches = len(set(DIGITW.findall(want)).intersection(set(DIGITW.findall(have))))
-        if matches >= 1:
-            tot += pow(2, matches - 1)
+    return sum(
+        pow(2, matches - 1)
+        if (
+            matches := len(
+                set(
+                    DIGITW.findall(line.split(":")[1].strip().split("|")[0])
+                ).intersection(
+                    set(DIGITW.findall(line.split(":")[1].strip().split("|")[1]))
+                )
+            )
+        )
+        >= 1
+        else 0
+        for line in data.readlines()
+    )
 
-    return tot
+
+def process_d4_p2(data: TextIOWrapper) -> int:
+    pass
 
 
 def get_processor(day: int, part: int) -> Callable[[TextIOWrapper], int]:
@@ -216,5 +227,7 @@ def get_processor(day: int, part: int) -> Callable[[TextIOWrapper], int]:
             return process_d3_p2
         case 4, 1:
             return process_d4_p1
+        case 4, 2:
+            return process_d4_p2
         case _:
             raise Exception(f"Unknown day:part pair {day=} {part=}")
