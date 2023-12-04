@@ -1,4 +1,5 @@
 import re
+from collections import defaultdict
 from io import TextIOWrapper
 from typing import Callable
 
@@ -208,7 +209,17 @@ def process_d4_p1(data: TextIOWrapper) -> int:
 
 
 def process_d4_p2(data: TextIOWrapper) -> int:
-    pass
+    original = list(map(lambda line: line.split(":")[1].strip(), data.readlines()))
+    copies = defaultdict(int)
+
+    for i, line in enumerate(original):
+        want, have = line.split("|")
+        matches = len(set(DIGITW.findall(want)).intersection(set(DIGITW.findall(have))))
+        for card in range(i + 2, i + 2 + matches):
+            copies[card] += 1
+
+    print(copies)
+    return 0
 
 
 def get_processor(day: int, part: int) -> Callable[[TextIOWrapper], int]:
