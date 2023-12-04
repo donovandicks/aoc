@@ -14,8 +14,14 @@ function firstAndLast<T>(xs: T[]): [T, T] {
   return [xs.at(0) as T, xs.at(-1) as T];
 }
 
+// Sum all elems in a number[]
 Array.prototype.sum = function (): number {
   return this.reduce((n, a) => n + a, 0);
+};
+
+// Check all elems in a bool[] are true
+Array.prototype.all = function (): boolean {
+  return this.every((v) => v);
 };
 
 const processD1P1 = (data: string): number =>
@@ -43,10 +49,10 @@ const processD2P1 = (data: string): number =>
     line.split(":")[1].replaceAll(",", "").replaceAll(";", "").trim().split(" ")
         .map(
           (v, i, a) => i % 2 === 0 ? Number(v) <= CUBES[a[i + 1]] : undefined,
-        ).filter((v): v is boolean => v !== undefined).every((v) => v)
+        ).filter((v): v is boolean => v !== undefined).all()
       ? Number(line.split(":")[0].split(" ")[1])
-      : undefined
-  ).filter((v): v is number => !!v).sum();
+      : 0
+  ).sum();
 
 export const getProcessor = (day: number, part: number): ProcessorFunc => {
   if (day === 1 && part === 1) {
