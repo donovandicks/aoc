@@ -39,22 +39,14 @@ const processD1P2 = (data: string): number =>
     ).sum();
 
 const processD2P1 = (data: string): number =>
-  data.trim().split("\n").map((line) => {
-    const [game, sets] = line.split(":");
-    if (
-      sets.replaceAll(",", "").replaceAll(";", "").trim().split(" ").map(
-        (v, i, a) => {
-          if (i % 2 !== 0) {
-            return;
-          }
-
-          return Number(v) <= CUBES[a[i + 1]];
-        },
-      ).filter((v): v is boolean => v !== undefined).every((v) => v)
-    ) {
-      return Number(game.split(" ")[1]);
-    }
-  }).filter((v): v is number => !!v).sum();
+  data.trim().split("\n").map((line) =>
+    line.split(":")[1].replaceAll(",", "").replaceAll(";", "").trim().split(" ")
+        .map(
+          (v, i, a) => i % 2 === 0 ? Number(v) <= CUBES[a[i + 1]] : undefined,
+        ).filter((v): v is boolean => v !== undefined).every((v) => v)
+      ? Number(line.split(":")[0].split(" ")[1])
+      : undefined
+  ).filter((v): v is number => !!v).sum();
 
 export const getProcessor = (day: number, part: number): ProcessorFunc => {
   if (day === 1 && part === 1) {
