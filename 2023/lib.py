@@ -3,6 +3,7 @@ from io import TextIOWrapper
 from typing import Callable
 
 DIGIT = re.compile(r"\d")
+DIGITW = re.compile(r"\d+")
 ADJS = [
     [-1, -1],  # tl
     [-1, 0],  # tm
@@ -188,6 +189,17 @@ def process_d3_p2(data: TextIOWrapper) -> int:
     )
 
 
+def process_d4_p1(data: TextIOWrapper) -> int:
+    tot = 0
+    for line in data.readlines():
+        want, have = line.split(":")[1].strip().split("|")
+        matches = len(set(DIGITW.findall(want)).intersection(set(DIGITW.findall(have))))
+        if matches >= 1:
+            tot += pow(2, matches - 1)
+
+    return tot
+
+
 def get_processor(day: int, part: int) -> Callable[[TextIOWrapper], int]:
     match day, part:
         case 1, 1:
@@ -202,5 +214,7 @@ def get_processor(day: int, part: int) -> Callable[[TextIOWrapper], int]:
             return process_d3_p1
         case 3, 2:
             return process_d3_p2
+        case 4, 1:
+            return process_d4_p1
         case _:
             raise Exception(f"Unknown day:part pair {day=} {part=}")
