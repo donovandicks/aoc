@@ -4,6 +4,6 @@ Personal repository for tracking completion of [Advent of Code](https://adventof
 
 ## 2023
 
-Current Status (Day 3):
+Current Status (Day 4):
 
-![alt text](current_stars.png "Screenshot of Progress for Day 3")
+![alt text](./current_stars.png "Screenshot of Progress for Day 4")
