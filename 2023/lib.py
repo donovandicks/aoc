@@ -216,10 +216,9 @@ def process_d4_p2(data: TextIOWrapper) -> int:
         want, have = line.split("|")
         matches = len(set(DIGITW.findall(want)).intersection(set(DIGITW.findall(have))))
         for card in range(i + 2, i + 2 + matches):
-            copies[card] += 1
+            copies[card] += 1 + (1 * copies.get(i + 1, 0))
 
-    print(copies)
-    return 0
+    return sum(copies.values()) + len(original)
 
 
 def get_processor(day: int, part: int) -> Callable[[TextIOWrapper], int]:
