@@ -27,7 +27,7 @@ def first_and_last[T](xs: list[T]) -> tuple[T, T]:
 
 def process_d1_p1(data: TextIOWrapper) -> int:
     return sum(
-        [int("".join(first_and_last(DIGIT.findall(line)))) for line in data.readlines()]
+        int("".join(first_and_last(DIGIT.findall(line)))) for line in data.readlines()
     )
 
 
@@ -48,7 +48,7 @@ def process_d1_p2(data: TextIOWrapper) -> int:
     )
 
     return sum(
-        [int("".join(first_and_last(DIGIT.findall(line)))) for line in clean_lines]
+        int("".join(first_and_last(DIGIT.findall(line)))) for line in clean_lines
     )
 
 
@@ -65,13 +65,11 @@ def process_d2_p1(data: TextIOWrapper) -> int:
         )
 
     return sum(
-        [
-            int(line.split(":")[0].split(" ")[1])
-            for line in data.readlines()
-            if is_possible(
-                line.split(":")[1].strip().replace(",", "").replace(";", "").split(" ")
-            )
-        ]
+        int(line.split(":")[0].split(" ")[1])
+        for line in data.readlines()
+        if is_possible(
+            line.split(":")[1].strip().replace(",", "").replace(";", "").split(" ")
+        )
     )
 
 
@@ -89,12 +87,10 @@ def process_d2_p2(data: TextIOWrapper) -> int:
         return maxes["blue"] * maxes["green"] * maxes["red"]
 
     return sum(
-        [
-            make_power(
-                line.split(":")[1].strip().replace(",", "").replace(";", "").split(" ")
-            )
-            for line in data.readlines()
-        ]
+        make_power(
+            line.split(":")[1].strip().replace(",", "").replace(";", "").split(" ")
+        )
+        for line in data.readlines()
     )
 
 
@@ -221,6 +217,25 @@ def process_d4_p2(data: TextIOWrapper) -> int:
     return sum(copies.values()) + len(original)
 
 
+def process_d5_p1(data: TextIOWrapper) -> int:
+    alamanac = data.read().split("\n\n")
+    seeds = alamanac[0].split(":")[1].strip().split(" ")
+
+    maps = []
+
+    for section in alamanac[1:]:
+        mappings = section.split("\n")[1:]
+        m = {}
+        for mapping in mappings:
+            d_start, s_start, length = mapping.split(" ")
+
+        maps.append(section.split("\n")[1:])
+
+    # print(alamanac)
+    print(seeds)
+    print(maps)
+
+
 def get_processor(day: int, part: int) -> Callable[[TextIOWrapper], int]:
     match day, part:
         case 1, 1:
@@ -239,5 +254,7 @@ def get_processor(day: int, part: int) -> Callable[[TextIOWrapper], int]:
             return process_d4_p1
         case 4, 2:
             return process_d4_p2
+        case 5, 1:
+            return process_d5_p1
         case _:
             raise Exception(f"Unknown day:part pair {day=} {part=}")
