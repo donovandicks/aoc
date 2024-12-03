@@ -1,5 +1,6 @@
 import argparse
 import itertools
+import re
 from typing import Callable, Counter, TypeAlias
 
 Solution: TypeAlias = Callable[[str], int]
@@ -63,11 +64,46 @@ def d2p2(data: str) -> int:
     )
 
 
+def d3p1(data: str) -> int:
+    sum = 0
+    pattern = re.compile(r"mul\((\d{1,3},\d{1,3})\)")
+    for line in data.splitlines():
+        matches = pattern.findall(line)
+        for match in matches:
+            l, r = match.split(",")
+            sum += int(l) * int(r)
+
+    return sum
+
+
+def d3p2(data: str) -> int:
+    sum = 0
+    pattern = re.compile(r"(do\(\)|don\'t\(\)|mul\((\d{1,3},\d{1,3})\))")
+
+    do = True
+    for line in data.splitlines():
+        matches = pattern.findall(line)
+        for group, val in matches:
+            if group == "do()":
+                do = True
+
+            if group == "don't()":
+                do = False
+
+            if group.startswith("mul") and do:
+                l, r = val.split(",")
+                sum += int(l) * int(r)
+
+    return sum
+
+
 registry: dict[str, Solution] = {
     "d1p1": d1p1,
     "d1p2": d1p2,
     "d2p1": d2p1,
     "d2p2": d2p2,
+    "d3p1": d3p1,
+    "d3p2": d3p2,
 }
 
 
@@ -88,4 +124,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     problem = f"d{args.day}p{args.part}"
 
-    print(registry[problem](load_data(problem)))
+    print(registry[problem](load_data(f"d{args.day}")))
