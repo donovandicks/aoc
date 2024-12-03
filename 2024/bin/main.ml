@@ -12,22 +12,22 @@ let read_data (file: string) : string =
     close_in_noerr in_chan; (* Still close channel in case error *)
     raise e
 
-let d1_get_lists (data: string): int =
-  let left, right = String.split_on_char '\n' data
+let d1_parse(data: string): int list * int list = 
+  String.split_on_char '\n' data
   |> List.map split_line
   |> List.fold_left (
     fun (left, right) sublist ->
       match sublist with
       | [x; y] -> (int_of_string x :: left, int_of_string y :: right)
       | _ -> failwith "incorrect sublist length")
-    ([], []) in
+    ([], []) 
+  |> fun (left, right) ->
+    (List.sort compare left, List.sort compare right)
 
-  let sorted_right = List.sort compare right in
-
-  left
-  |> List.sort compare
-  |> List.mapi
-    (fun i x -> (Int.abs(x - List.nth sorted_right i)))
+let d1p1 (data: string): int =
+  d1_parse data
+  |> fun (left, right) ->
+    left |> List.mapi (fun i x -> (Int.abs(x - List.nth right i)))
   |> List.fold_left ( + ) 0
 
 let () = 
@@ -43,6 +43,8 @@ let () =
 
   Printf.sprintf "./inputs/d%dp%d.txt" !day !part
   |> read_data
-  |> d1_get_lists
+  |> match !day, !part with
+    | 1, 1 -> d1p1
+    | _ -> failwith "unknown day or part";
   |> string_of_int
   |> print_endline
