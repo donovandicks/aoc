@@ -28,11 +28,13 @@ def d1p2(data: str) -> int:
     return sum(l * right_counts.get(l, 0) for l in left)
 
 
+neg_diffs = {-1, -2, -3}
+pos_diffs = {1, 2, 3}
+
+
 def is_safe(line: list[int]) -> bool:
-    """Line is strictly ordered and all diffs are within [1, 3]"""
-    return ((sorted(line) == line) or (sorted(line, reverse=True) == line)) and all(
-        (1 <= abs(a - b) <= 3) for a, b in itertools.pairwise(line)
-    )
+    diffs = set([b - a for a, b in itertools.pairwise(line)])
+    return diffs.issubset(neg_diffs) or diffs.issubset(pos_diffs)
 
 
 def d2p1(data: str) -> int:
@@ -46,14 +48,26 @@ def d2p1(data: str) -> int:
     )
 
 
+def could_be_safe(line: list[int]) -> bool:
+    return any(is_safe(line[:i] + line[i + 1 :]) for i in range(len(line)))
+
+
 def d2p2(data: str) -> int:
-    pass
+    return len(
+        list(
+            filter(
+                could_be_safe,
+                [[int(i) for i in line.split(" ")] for line in data.splitlines()],
+            )
+        )
+    )
 
 
 registry: dict[str, Solution] = {
     "d1p1": d1p1,
     "d1p2": d1p2,
     "d2p1": d2p1,
+    "d2p2": d2p2,
 }
 
 
