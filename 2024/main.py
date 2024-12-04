@@ -1,6 +1,8 @@
 import argparse
 import itertools
 import re
+from functools import partial, reduce
+from operator import mul
 from typing import Callable, Counter, TypeAlias
 
 Solution: TypeAlias = Callable[[str], int]
@@ -64,35 +66,17 @@ def d2p2(data: str) -> int:
     )
 
 
-def d3p1(data: str) -> int:
-    sum = 0
-    pattern = re.compile(r"mul\((\d{1,3},\d{1,3})\)")
-    for line in data.splitlines():
-        matches = pattern.findall(line)
-        for match in matches:
-            l, r = match.split(",")
-            sum += int(l) * int(r)
-
-    return sum
+pattern = r"(do\(\)|don\'t\(\)|mul\((\d{1,3},\d{1,3})\))"
 
 
-def d3p2(data: str) -> int:
-    sum = 0
-    pattern = re.compile(r"(do\(\)|don\'t\(\)|mul\((\d{1,3},\d{1,3})\))")
+def d3(data: str, check_do: bool) -> int:
+    do, sum = True, 0
+    for group, val in re.compile(pattern, re.MULTILINE).findall(data):
+        if check_do:
+            do = True if group == "do()" else False if group == "don't()" else do
 
-    do = True
-    for line in data.splitlines():
-        matches = pattern.findall(line)
-        for group, val in matches:
-            if group == "do()":
-                do = True
-
-            if group == "don't()":
-                do = False
-
-            if group.startswith("mul") and do:
-                l, r = val.split(",")
-                sum += int(l) * int(r)
+        if group.startswith("m") and do:
+            sum += reduce(mul, [int(i) for i in val.split(",")])
 
     return sum
 
@@ -102,8 +86,8 @@ registry: dict[str, Solution] = {
     "d1p2": d1p2,
     "d2p1": d2p1,
     "d2p2": d2p2,
-    "d3p1": d3p1,
-    "d3p2": d3p2,
+    "d3p1": partial(d3, check_do=False),
+    "d3p2": partial(d3, check_do=True),
 }
 
 
