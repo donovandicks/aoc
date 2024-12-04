@@ -10,27 +10,30 @@ Solution: TypeAlias = Callable[[str], int]
 # DAY 1
 
 
-def d1_get_lists(data: str) -> tuple[list[int], list[int]]:
-    left, right = [], []
-
-    for line in data.splitlines():
-        ln, rn = line.split("   ")
-        left.append(int(ln))
-        right.append(int(rn))
-
-    return left, right
+def sum_diffs(ls: list[int], rs: list[int]) -> int:
+    return sum(abs(ls[i] - rs[i]) for i in range(len(ls)))
 
 
-def d1p1(data: str) -> int:
-    left, right = d1_get_lists(data)
-    ls, rs = sorted(left), sorted(right)
-    return sum(abs(ls[i] - rs[i]) for i in range(len(left)))
+def mul_counts(ls: list[int], rs: list[int]) -> int:
+    counter = Counter(rs)
+    return sum(l * counter.get(l, 0) for l in ls)
 
 
-def d1p2(data: str) -> int:
-    left, right = d1_get_lists(data)
-    right_counts = Counter(right)
-    return sum(l * right_counts.get(l, 0) for l in left)
+def d1(data: str, func: Callable[[list[int], list[int]], int]) -> int:
+    left, right = map(
+        sorted,
+        map(
+            list,
+            zip(
+                *(
+                    tuple(map(lambda i: int(i), line.split("   ")))
+                    for line in data.splitlines()
+                )
+            ),
+        ),
+    )
+
+    return func(left, right)
 
 
 # DAY 2
@@ -79,8 +82,8 @@ def d3(data: str, check_do: bool) -> int:
 # END
 
 registry: dict[str, Solution] = {
-    "d1p1": d1p1,
-    "d1p2": d1p2,
+    "d1p1": partial(d1, func=sum_diffs),
+    "d1p2": partial(d1, func=mul_counts),
     "d2p1": partial(d2, check_could=False),
     "d2p2": partial(d2, check_could=True),
     "d3p1": partial(d3, check_do=False),
