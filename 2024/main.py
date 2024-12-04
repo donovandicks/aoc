@@ -7,6 +7,8 @@ from typing import Callable, Counter, TypeAlias
 
 Solution: TypeAlias = Callable[[str], int]
 
+# DAY 1
+
 
 def d1_get_lists(data: str) -> tuple[list[int], list[int]]:
     left, right = [], []
@@ -31,6 +33,8 @@ def d1p2(data: str) -> int:
     return sum(l * right_counts.get(l, 0) for l in left)
 
 
+# DAY 2
+
 neg_diffs = {-1, -2, -3}
 pos_diffs = {1, 2, 3}
 
@@ -40,31 +44,22 @@ def is_safe(line: list[int]) -> bool:
     return diffs.issubset(neg_diffs) or diffs.issubset(pos_diffs)
 
 
-def d2p1(data: str) -> int:
-    return len(
-        list(
-            filter(
-                is_safe,
-                [[int(i) for i in line.split(" ")] for line in data.splitlines()],
-            )
-        )
-    )
-
-
 def could_be_safe(line: list[int]) -> bool:
     return any(is_safe(line[:i] + line[i + 1 :]) for i in range(len(line)))
 
 
-def d2p2(data: str) -> int:
+def d2(data: str, check_could: bool) -> int:
     return len(
         list(
             filter(
-                could_be_safe,
+                could_be_safe if check_could else is_safe,
                 [[int(i) for i in line.split(" ")] for line in data.splitlines()],
             )
         )
     )
 
+
+# DAY 3
 
 pattern = r"(do\(\)|don\'t\(\)|mul\((\d{1,3},\d{1,3})\))"
 
@@ -81,11 +76,13 @@ def d3(data: str, check_do: bool) -> int:
     return sum
 
 
+# END
+
 registry: dict[str, Solution] = {
     "d1p1": d1p1,
     "d1p2": d1p2,
-    "d2p1": d2p1,
-    "d2p2": d2p2,
+    "d2p1": partial(d2, check_could=False),
+    "d2p2": partial(d2, check_could=True),
     "d3p1": partial(d3, check_do=False),
     "d3p2": partial(d3, check_do=True),
 }
