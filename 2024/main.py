@@ -51,11 +51,11 @@ def could_be_safe(line: list[int]) -> bool:
     return any(is_safe(line[:i] + line[i + 1 :]) for i in range(len(line)))
 
 
-def d2(data: str, check_could: bool) -> int:
+def d2(data: str, func: Callable[[list[int]], bool]) -> int:
     return len(
         list(
             filter(
-                could_be_safe if check_could else is_safe,
+                func,
                 [[int(i) for i in line.split(" ")] for line in data.splitlines()],
             )
         )
@@ -84,8 +84,8 @@ def d3(data: str, check_do: bool) -> int:
 registry: dict[str, Solution] = {
     "d1p1": partial(d1, func=sum_diffs),
     "d1p2": partial(d1, func=mul_counts),
-    "d2p1": partial(d2, check_could=False),
-    "d2p2": partial(d2, check_could=True),
+    "d2p1": partial(d2, func=is_safe),
+    "d2p2": partial(d2, func=could_be_safe),
     "d3p1": partial(d3, check_do=False),
     "d3p2": partial(d3, check_do=True),
 }
