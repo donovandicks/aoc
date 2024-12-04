@@ -20,20 +20,20 @@ def mul_counts(ls: list[int], rs: list[int]) -> int:
 
 
 def d1(data: str, func: Callable[[list[int], list[int]], int]) -> int:
-    left, right = map(
-        sorted,
-        map(
-            list,
-            zip(
-                *(
-                    tuple(map(lambda i: int(i), line.split("   ")))
-                    for line in data.splitlines()
+    return func(
+        *[
+            sorted(ls)
+            for ls in [
+                list(tup)
+                for tup in zip(
+                    *(
+                        tuple(int(i) for i in line.split("   "))
+                        for line in data.splitlines()
+                    )
                 )
-            ),
-        ),
+            ]
+        ]
     )
-
-    return func(left, right)
 
 
 # DAY 2
