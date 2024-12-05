@@ -79,6 +79,104 @@ def d3(data: str, check_do: bool) -> int:
     return sum
 
 
+# DAY 4
+
+dirs = [
+    (0, 1),  # up
+    (1, 1),  # up right
+    (1, 0),  # right
+    (1, -1),  # down right
+    (0, -1),  # down
+    (-1, -1),  # down left
+    (-1, 0),  # left
+    (-1, 1),  # up left
+]
+
+diags = {
+    "ur": (1, 1),  # up right
+    "dl": (-1, -1),  # down left
+    "ul": (-1, 1),  # up left
+    "dr": (1, -1),  # down right
+}
+
+word = "XMAS"
+maso = ord("M") * 2 + ord("S") * 2
+
+
+def find_xmas(
+    word_search: list[str],
+    check_bounds: Callable[[int, int], bool],
+    pos: tuple[int, int],
+) -> int:
+    def check_match(dir: tuple[int, int]) -> bool:
+        for i in range(len(word)):
+            x, y = (pos[0] + dir[0] * i, pos[1] + dir[1] * i)
+            if not check_bounds(x, y):
+                return False
+
+            if word_search[x][y] != word[i]:
+                return False
+
+        return True
+
+    return sum(1 for dir in dirs if check_match(dir))
+
+
+def find_mas(
+    word_search: list[str],
+    check_bounds: Callable[[int, int], bool],
+    pos: tuple[int, int],
+) -> int:
+    if word_search[pos[0]][pos[1]] != "A":
+        return 0
+
+    counter = {"ur": "", "dl": "", "ul": "", "dr": ""}
+    for name, dir in diags.items():
+        x, y = (pos[0] + dir[0], pos[1] + dir[1])
+        if not check_bounds(x, y):
+            return 0
+
+        char = word_search[x][y]
+        if char not in ["M", "S"]:
+            return 0
+
+        counter[name] = char
+
+    if (
+        counter["ur"] != counter["dl"]
+        and counter["ul"] != counter["dr"]
+        and sum(ord(c) for c in counter.values()) == maso
+    ):
+        return 1
+
+    return 0
+
+
+def d4(
+    data: str,
+    func: Callable[
+        [
+            list[str],
+            Callable[[int, int], bool],
+            tuple[int, int],
+        ],
+        int,
+    ],
+) -> int:
+    count = 0
+    word_search = data.splitlines()
+    nrows, ncols = len(word_search), len(word_search[0])
+
+    def check_bounds(r: int, c: int) -> bool:
+        return (r >= 0 and r < nrows) and (c >= 0 and c < ncols)
+
+    for r in range(nrows):
+        for c in range(ncols):
+            count += func(word_search, check_bounds, (r, c))
+
+    return count
+
+
 # END
 
 registry: dict[str, Solution] = {
@@ -88,6 +186,8 @@ registry: dict[str, Solution] = {
     "d2p2": partial(d2, func=could_be_safe),
     "d3p1": partial(d3, check_do=False),
     "d3p2": partial(d3, check_do=True),
+    "d4p1": partial(d4, func=find_xmas),
+    "d4p2": partial(d4, func=find_mas),
 }
 
 
