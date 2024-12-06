@@ -1,6 +1,7 @@
 import argparse
 import itertools
 import re
+from collections import defaultdict
 from functools import partial, reduce
 from operator import mul
 from typing import Callable, Counter, TypeAlias
@@ -177,6 +178,34 @@ def d4(
     return count
 
 
+# DAY 5
+
+
+def d5(data: str) -> int:
+    rules = defaultdict(set)
+
+    updates = []
+    for line in data.splitlines():
+        if "|" in line:
+            x, y = line.split("|")
+            rules[x].add(y)
+            continue
+
+        if line in ["\n", ""]:
+            continue
+
+        updates.append(line.split(","))
+
+    return sum(
+        int(update[len(update) // 2])
+        for update in updates
+        if all(
+            not set(update[:i]).intersection(rules.get(num, set()))
+            for i, num in enumerate(update)
+        )
+    )
+
+
 # END
 
 registry: dict[str, Solution] = {
@@ -188,6 +217,7 @@ registry: dict[str, Solution] = {
     "d3p2": partial(d3, check_do=True),
     "d4p1": partial(d4, func=find_xmas),
     "d4p2": partial(d4, func=find_mas),
+    "d5p1": d5,
 }
 
 
