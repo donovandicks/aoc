@@ -2,7 +2,7 @@ import argparse
 import itertools
 import re
 from collections import defaultdict
-from functools import partial, reduce
+from functools import cmp_to_key, partial, reduce
 from operator import mul
 from typing import Callable, Counter, TypeAlias
 
@@ -181,21 +181,27 @@ def d4(
 # DAY 5
 
 
-def d5(data: str) -> int:
+def make_rules_and_updates(
+    data: str,
+) -> tuple[defaultdict[str, set[str]], list[list[str]]]:
     rules = defaultdict(set)
 
-    updates = []
+    updates: list[list[str]] = []
     for line in data.splitlines():
+        if line in ["\n", ""]:
+            continue
+
         if "|" in line:
             x, y = line.split("|")
             rules[x].add(y)
             continue
 
-        if line in ["\n", ""]:
-            continue
-
         updates.append(line.split(","))
 
+    return rules, updates
+
+
+def count_correct(rules: defaultdict[str, set[str]], updates: list[list[str]]) -> int:
     return sum(
         int(update[len(update) // 2])
         for update in updates
@@ -204,6 +210,43 @@ def d5(data: str) -> int:
             for i, num in enumerate(update)
         )
     )
+
+
+def fix_and_count_incorrect(
+    rules: defaultdict[str, set[str]], updates: list[list[str]]
+) -> int:
+    incorrect: list[list[str]] = []
+    for update in updates:
+        if any(
+            set(update[:i]).intersection(rules.get(num, set()))
+            for i, num in enumerate(update)
+        ):
+            incorrect.append(update)
+
+    ruleset = set()
+    for x, ys in rules.items():
+        for y in ys:
+            ruleset.add((x, y))
+
+    def sort_(a: str, b: str) -> int:
+        if (a, b) in ruleset:
+            return -1
+        elif (b, a) in ruleset:
+            return 1
+        else:
+            return 0
+
+    for update in incorrect:
+        update.sort(key=cmp_to_key(sort_))
+
+    return sum(int(update[len(update) // 2]) for update in incorrect)
+
+
+def d5(
+    data: str, func: Callable[[defaultdict[str, set[str]], list[list[str]]], int]
+) -> int:
+    rules, updates = make_rules_and_updates(data)
+    return func(rules, updates)
 
 
 # END
@@ -217,7 +260,8 @@ registry: dict[str, Solution] = {
     "d3p2": partial(d3, check_do=True),
     "d4p1": partial(d4, func=find_xmas),
     "d4p2": partial(d4, func=find_mas),
-    "d5p1": d5,
+    "d5p1": partial(d5, func=count_correct),
+    "d5p2": partial(d5, func=fix_and_count_incorrect),
 }
 
 
