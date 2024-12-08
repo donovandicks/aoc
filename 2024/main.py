@@ -2,6 +2,8 @@ import argparse
 import itertools
 import re
 from collections import defaultdict
+from dataclasses import dataclass
+from enum import StrEnum
 from functools import cmp_to_key, partial, reduce
 from operator import mul
 from typing import Callable, Counter, TypeAlias
@@ -249,6 +251,99 @@ def d5(
     return func(rules, updates)
 
 
+# DAY 6
+
+OBSTACLE = "#"
+
+
+class Guard(StrEnum):
+    UP = "^"
+    RIGHT = ">"
+    LEFT = "<"
+    DOWN = "v"
+
+    @property
+    def offset(self) -> tuple[int, int]:
+        match self:
+            case Guard.UP:
+                return (0, -1)
+            case Guard.RIGHT:
+                return (1, 0)
+            case Guard.DOWN:
+                return (0, 1)
+            case Guard.LEFT:
+                return (-1, 0)
+
+    def rotate(self) -> "Guard":
+        match self:
+            case Guard.UP:
+                return Guard.RIGHT
+            case Guard.RIGHT:
+                return Guard.DOWN
+            case Guard.DOWN:
+                return Guard.LEFT
+            case Guard.LEFT:
+                return Guard.UP
+
+
+@dataclass
+class Position:
+    pos: tuple[int, int]
+    guard: Guard
+
+    @property
+    def x(self) -> int:
+        return self.pos[0]
+
+    @property
+    def y(self) -> int:
+        return self.pos[1]
+
+    def next(self) -> tuple[int, int]:
+        return (self.x + self.guard.offset[0], self.y + self.guard.offset[1])
+
+
+def find_start(lines: list[str]) -> Position:
+    for y, row in enumerate(lines):
+        for x, char in enumerate(row):
+            if char in Guard:
+                return Position(pos=(x, y), guard=Guard(char))
+
+    raise ValueError("starting position not found")
+
+
+def write_path(lines: list[str], locs: set[tuple[int, int]]):
+    with open("./traversed.txt", "w") as f:
+        for loc in locs:
+            line = list(lines[loc[1]])
+            line[loc[0]] = "X"
+            lines[loc[1]] = "".join(line)
+
+        f.write("\n".join(lines))
+
+
+def d6(data: str) -> int:
+    lines = data.splitlines()
+    (max_x, max_y) = len(lines[0]), len(lines)
+    locs = set()
+    p = find_start(lines)
+    locs.add(p.pos)
+
+    while True:
+        (next_x, next_y) = p.next()
+        if next_x < 0 or next_y < 0 or next_x > max_x or next_y > max_y:
+            write_path(lines, locs)
+            return len(locs)
+
+        next_char = lines[next_y][next_x]
+        if next_char == OBSTACLE:
+            p.guard = p.guard.rotate()
+            continue
+
+        p.pos = (next_x, next_y)
+        locs.add(p.pos)
+
+
 # END
 
 registry: dict[str, Solution] = {
@@ -262,6 +357,8 @@ registry: dict[str, Solution] = {
     "d4p2": partial(d4, func=find_mas),
     "d5p1": partial(d5, func=count_correct),
     "d5p2": partial(d5, func=fix_and_count_incorrect),
+    "d6p1": partial(d6),  # , func=find_xmas),
+    "d6p2": partial(d6),  # , func=find_mas),
 }
 
 
